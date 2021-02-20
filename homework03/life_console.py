@@ -1,3 +1,4 @@
+import argparse
 import curses
 from datetime import datetime
 from pathlib import Path
@@ -50,9 +51,34 @@ class Console(UI):
                 running = False
             if not pause:
                 win.clear()
-                curses.delay_output(50)
+                curses.delay_output(200)
                 self.draw_borders(win)
                 self.draw_grid(win)
                 self.life.step()
                 win.refresh()
         curses.endwin()
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="GameOfLife")
+    parser.add_argument("--rows", type=int, default=10, help="Enter number of rows in grid")
+    parser.add_argument("--cols", type=int, default=30, help="Enter number of columns in grid")
+    parser.add_argument("--speed", type=int, default=1, help="Enter game speed")
+    parser.add_argument(
+        "--maxgenerations", type=int, default=1000, help="Enter max number of generations"
+    )
+    parser.add_argument("--randomize", type=int, default=1, help="Should grid be randomized?")
+    parser.add_argument("--grid_path", type=Path, default=None, help="Load grid from file")
+    parser.add_argument(
+        "--symbol", type=str, default="@", help="Select a symbol to display live cells"
+    )
+    arguments = parser.parse_args()
+    if arguments.grid_path is not None:
+        gui = Console(GameOfLife.from_file(arguments.grid_path))
+    else:
+        gui = Console(
+            GameOfLife(
+                (arguments.rows, arguments.cols), arguments.randomize, arguments.maxgenerations
+            )
+        )
+    gui.run()

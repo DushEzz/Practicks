@@ -1,3 +1,4 @@
+import argparse
 from datetime import datetime
 from pathlib import Path
 
@@ -99,3 +100,36 @@ class GUI(UI):
             pygame.display.flip()
             clock.tick(self.speed)
         pygame.quit()
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="GameOfLife")
+    parser.add_argument("--rows", type=int, default=20, help="Enter number of rows in grid")
+    parser.add_argument("--cols", type=int, default=20, help="Enter number of columns in grid")
+    parser.add_argument("--speed", type=int, default=10, help="Enter game speed")
+    parser.add_argument("--size", type=int, default=10, help="Enter cell size")
+    parser.add_argument(
+        "--primary_color", type=str, default="green", help="Enter color of alive cells"
+    )
+    parser.add_argument(
+        "--secondary_color", type=str, default="white", help="Enter color of dead cells"
+    )
+    parser.add_argument(
+        "--maxgenerations", type=int, default=50, help="Enter max number of generations"
+    )
+    parser.add_argument("--grid_path", type=Path, default=None, help="Load grid from file")
+    parser.add_argument("--randomize", type=int, default=1, help="Should grid be randomized?")
+    arguments = parser.parse_args()
+    if arguments.grid_path is not None:
+        gui = GUI(GameOfLife.from_file(arguments.grid_path), arguments.size, arguments.speed)
+    else:
+        gui = GUI(
+            GameOfLife(
+                (arguments.rows, arguments.cols),
+                arguments.randomize,
+                arguments.maxgenerations,
+            ),
+            arguments.size,
+            arguments.speed,
+        )
+    gui.run()
